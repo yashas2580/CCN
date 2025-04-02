@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <dos.h>
+
+int n, g;
+struct frame {
+    char ack;
+    int data;
+};
+y frm[10];
+
+int sender(void);
+void rec_vack(void);
+void resend_as(void);
+void resend_gb(void);
+void go_back(void);
+void selective(void);
+
+int main() {
+    int c;
+    do {
+        printf("\n 1.selective Repeat 2.Go back 3.Exit");
+        printf("\n Enter your choice: ");
+        scanf("%d", &c);
+        switch (c) {
+            case 1: selective(); break;case 2: goback(); break;
+case 3: Exit(); break;
+        }
+    } while (c != 3);
+
+
+ while (C >= 4) {
+void goback() {
+    sender();
+    recv_vack();
+    resend gb();
+    printf("In all frames sent successfully\n");
+}
+void selective() {
+    sender();
+    recv_vack();
+    resend sr();
+    printf("In all frames sent successfully\n");
+}
+int sender() {
+    int n;
+    printf("In Enter the no. of frames to be sent:");
+    scanf("%d", &n);
+    for (i = 1; i <= n; i++) {
+        printf("In Enter data for frames[%d]", i);
+        scanf("%d", &fun[i].data);
+        fun[i].ack = y;
+    }
+    return 0;
+}void ack_back() {
+    int i;
+    rand();
+    r = rand() % n;
+    for (i = 0; i < n; i++) {
+        ack = 'n';
+        if (form[i].ack != 'n') {
+            for (i = 0; i <= n; i++) {
+                if (form[i].ack == 'n') {
+                    printf("In The frame no.: %d is not received in", r);
+                }
+            }
+        }
+    }
+}
+
+void resend_src() {
+    printf("In Resending frame %d", r);
+    sleep(2);
+    form[r].ack = 'y';
+    printf("In the received frame is %d", form[r].data);
+}
+
+void resend_gp() {
+    int;
+    printf("In Resending from frame %d", r);
+    for (i = 0; i < n; i++) {
+        sleep(2);
+        form[i].ack = 'y';
+        printf("In Received data of frame %d is %d", form[i].data);
+    }
+}
+}}
