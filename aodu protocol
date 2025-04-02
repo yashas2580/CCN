@@ -1,0 +1,101 @@
+# Define options
+set val(chan)   channel/WirelessChannel;   # channel type
+set val(prop)   propagation/TwoRayGround;   # radio propagation model
+set val(netif)  Phy/WirelessPhy;           # network interface type
+set val(mac)    Mac/802_11;                # Mac type
+set val(ifq)    Queue/DropTail/PriQueue;   # Interface queue type
+set val(ll)     LL;                         # link layer type
+set val(ant)    Antenna/OmniAntenna;       # antenna model
+set val(ifqlen) 50;                        # max packet in q
+set val(nn)    5;                          # number of mobilenodes
+set val(rp)    AODV;                       # routing protocol
+set val(x) 500; # x dimension of topography
+set val(y) 400; # y dimension of topography
+set val(dep) 150; # time of simulation end
+set ns [new simulator]
+set tracedd [open testADV.tr W]
+set windowVSime2 [open win.tr W]
+set namtrace [open testADV.nam W]
+$ns brace-all $tracedd
+$ns namtrace-all-wireless $namtrace $val(x) $val(y)
+# set up topography object
+set topo [new Topography]
+$topo loadFlatgrid $val(x) $val(y)
+create-god $val(nn)
+# create or configure the nodes
+$ns node-config -adhocRouting $val(rp)\
+ -llType $val(M)\
+ -macType $val(mac)\
+ -ifqType $val(ifq)\
+ -antType $val(ant)\
+ -propType $val(prop)\
+ -phyType $val(phy)\
+ -channelType $val(chan)\
+ -topoInstance $topo\
+ -agentTrace ON\
+ -routerTrace ON\
+ -macTrace OFF\
+ -movementTrace ON.
+for {set i 0} {$i < $val(nn)} {incr i} {
+    set node($i) [new node]
+    $node($i) set X [expr {10 * round(rand() * 480)}]
+    $node($i) set Y [expr {10 * round(rand() * 380)}]
+    $node($i) set Z 0.0
+}
+
+for {set i 0} {$i < $val(nn)} {incr i} {
+    set dest [expr {15 + round(rand() * 60)}]  ;#node($i) set dest 
+    $node($i) set [expr {10 + round(rand() * 480)}] [expr {10 + round(rand() * 380)}]
+    [expr {2 + round(rand() * 15)}]
+}
+
+#set a TCP connection between node(2) and node(4).
+set tcp1 [new Agent/TCPL/ Newreno]
+$tcp1 set class 1
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $node(2) $tcp1
+$ns attach-agent $node(4) $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ns at 10.0 "$ftp1 start"
+
+#set a TCP connection between node(1) and node(3).
+set tcp2 [new Agent/TCPL/ Newreno]
+$tcp2 set class 2
+set sink2 [new Agent/TCPSink]
+$ns attach-agent $node(1) $tcp2
+$ns attach-agent $node(3) $sink2
+$ns connect $tcp2 $sink2
+set $ftp2 [new application/FTP]
+$ftp2 attach-agent $tcp2
+$ns at 10.0 "$tcp start"
+# Printing the window size
+proc plotwindow {tcpSource file} {
+    global ns
+    set time 0.01
+    set now [$ns now]
+    set curnd [[$tcpSource set curnd]]
+    puts $file "$now $curnd"
+    $ns at [expr $now + $time] "plotwindow $tcpSource $file"
+}
+$ns at 10.1 "plotwindow $ftp1 $windowVsTime2"
+# Define node initial position in tn 
+for {set i 0} {$i < [val(nn)]} {incr i} {
+    # 30 defines the node size for nam
+    $ns initial_node $node($i) reset
+}
+# Telling nodes when the simulation ends
+for {set i 0} {$i < [val(nn)]} {incr i} {
+    $ns at [val(step)] "$node($i) reset"
+}
+# Ending nam and the simulation
+$ns at [val(step)] "$ns nam end -wires $val(step)"
+$ns at 150 "puts \"end simulation\"; $ns halt"
+proc step 133;
+global rs traced namtrace;
+$rs flush-trace;
+close $traced;
+close $namtrace;
+}
+$rs run.
